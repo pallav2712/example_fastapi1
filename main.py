@@ -27,9 +27,9 @@ def find_post(id):
 def root():
     return {"message": "Welcome to my api!"}
 
-@app.get("/posts")
-def get_posts():
-    return {"data": my_posts}
+# @app.get("/posts")
+# def get_posts():
+#     return {"data": "this is my get posts data"}
 
 # @app.post("/createposts")
 # def create_posts(payload: dict = Body(...)):
@@ -48,7 +48,7 @@ def create_posts(post: Post):
 
 
 @app.get("/posts/{id}")
-def get_posts(id):
-    print(type(int(id)))
+def get_posts(id: int):
     post = find_post(id)
+    print(post)
     return{"post_detail": post}

@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI,Response,status, HTTPException
+from fastapi import FastAPI,Response,status,HTTPException
 from fastapi.params import Body
 from pydantic import BaseModel
 from random import randrange
@@ -36,7 +36,7 @@ def root():
 #     print(payload)
 #     return {"new_post": f"title: {payload['title']} content: {payload['content']}"}
 
-@app.post("/posts")
+@app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_posts(post: Post):
     #print(post)
     #print(post.dict())

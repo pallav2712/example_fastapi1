@@ -16,7 +16,18 @@ class Post(BaseModel):
 
 
 
+while True:
 
+    try:
+        conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres',
+                                    password='051727', cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print("Database connection was sucessfull!")
+        break
+    except Exception as error:
+        print("Connecting to database failed")
+        print("Error: ", error)   
+        time.sleep(2)
 
 my_posts = [{"title": "title of post 1", "content": "content of post 1", "id": 1},
 {"title": "favourite foods", "content": "I like pizza", "id": 2}]   
@@ -37,7 +48,7 @@ def root():
     return {"message": "Welcome to my api!"}
 
 @app.get("/posts")
-def get_posts():
+def get_posts_o():
     return {"data": my_posts}
 
 # @app.post("/createposts")

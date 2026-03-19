@@ -12,7 +12,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
+    
 
 
 
@@ -28,6 +28,7 @@ while True:
         print("Connecting to database failed")
         print("Error: ", error)   
         time.sleep(2)
+        
 
 my_posts = [{"title": "title of post 1", "content": "content of post 1", "id": 1},
 {"title": "favourite foods", "content": "I like pizza", "id": 2}]   
@@ -49,7 +50,10 @@ def root():
 
 @app.get("/posts")
 def get_posts_o():
-    return {"data": my_posts}
+    posts = cursor.execute("""SELECT * FROM posts""")
+    posts = cursor.fetchall()
+    #print(posts)
+    return {"data": posts}
 
 # @app.post("/createposts")
 # def create_posts(payload: dict = Body(...)):

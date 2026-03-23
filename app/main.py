@@ -76,25 +76,35 @@ def get_posts_o(db: Session = Depends(get_db)):
 #     return {"new_post": f"title: {payload['title']} content: {payload['content']}"}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post):
-    cursor.execute("""INSERT INTO posts (title, content, published)
-                    VALUES (%s, %s, %s) RETURNING *""",
-                    (post.title, post.content, post.published))
-    new_post = cursor.fetchone()
+def create_posts(post: Post, db: Session = Depends(get_db)):
+    # cursor.execute("""INSERT INTO posts (title, content, published)
+    #                 VALUES (%s, %s, %s) RETURNING *""",
+    #                 (post.title, post.content, post.published))
+    # new_post = cursor.fetchone()
+    # conn.commit()
     
-    conn.commit()
+    #print(**post.model_dump())
+    #new_post = models.Post(title=post.title, content=post.content, published=post.published) #or
     
+    new_post = models.Post(**post.model_dump())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+
     return {"data": new_post}
 
 
 @app.get("/posts/{id}")
-def get_posts(id: int):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id)))
-    post = cursor.fetchone()
+def get_posts(id: int, db: Session = Depends(get_db)):
+    # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id)))
+    # post = cursor.fetchone()
     
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"post with id: {id} was not found")    
+    
     return {"post_detail": post}
     
 

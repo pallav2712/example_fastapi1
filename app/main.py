@@ -63,10 +63,11 @@ def test_post(db: Session = Depends(get_db)):
     return{"status": posts}
 
 @app.get("/posts")
-def get_posts_o():
-    posts = cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
-    #print(posts)
+def get_posts_o(db: Session = Depends(get_db)):
+    # posts = cursor.execute("""SELECT * FROM posts""")
+    # posts = cursor.fetchall()
+
+    posts = db.query(models.Post).all()
     return {"data": posts}
 
 # @app.post("/createposts")

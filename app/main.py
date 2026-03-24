@@ -1,3 +1,4 @@
+from multiprocessing import synchronize
 from typing import Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
@@ -115,15 +116,20 @@ def get_latest_post():
 
 
 @app.delete("/posts/{id}", status_code= status.HTTP_204_NO_CONTENT)
-def delete_post(id: int):
-    cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id)))
-    deleted_post = cursor.fetchone()
-    conn.commit()
+def delete_post(id: int, db: Session = Depends(get_db)):
+    # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id)))
+    # deleted_post = cursor.fetchone()
+    # conn.commit()
 
-    if deleted_post == None:
+    post = db.query(models.Post).filter(models.Post.id == id)
+
+    if post.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} does not exist")
     
+    post.delete(synchronize_session=False)
+    db.commit()
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
  
 

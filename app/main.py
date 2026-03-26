@@ -1,5 +1,5 @@
 from multiprocessing import synchronize
-from typing import Optional
+from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
@@ -56,7 +56,7 @@ def test_post(db: Session = Depends(get_db)):
 
     return{"status": posts}
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 def get_posts_o(db: Session = Depends(get_db)):
     # posts = cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
@@ -69,7 +69,7 @@ def get_posts_o(db: Session = Depends(get_db)):
 #     print(payload)
 #     return {"new_post": f"title: {payload['title']} content: {payload['content']}"}
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published)
     #                 VALUES (%s, %s, %s) RETURNING *""",

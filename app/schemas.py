@@ -13,8 +13,9 @@ class PostCreate(PostBase):
 
 
 
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool
-    
+class Post(PostBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

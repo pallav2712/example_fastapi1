@@ -4,3 +4,4 @@ __pycache__/
 .env
 *.ipynb
 oop.py
+oopself.py

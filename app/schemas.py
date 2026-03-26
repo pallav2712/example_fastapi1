@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
@@ -18,4 +18,18 @@ class Post(PostBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
+        #used to convert sqlalchemy model to pydantic model
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserOut(BaseModel):
+    id: int
+    email : EmailStr
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

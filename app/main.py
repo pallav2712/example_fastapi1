@@ -13,7 +13,7 @@ from .database import engine, get_db
 from .routers import post, user
 
 
-models.Base.metadata.create_all(bind=engine)    # type: ignore
+models.Base.metadata.create_all(bind=engine)    
 
 
 app = FastAPI()

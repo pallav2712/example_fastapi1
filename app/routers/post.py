@@ -4,11 +4,14 @@ from typing import List
 from .. import models, schemas
 from ..database import get_db
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/posts",
+    tags=['Posts']
+)
 
 #get
-@router.get("/posts", response_model=List[schemas.Post])
-def get_posts_o(db: Session = Depends(get_db)):
+@router.get("/", response_model=List[schemas.Post])
+def get_posts(db: Session = Depends(get_db)):
     # posts = cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
 
@@ -17,7 +20,7 @@ def get_posts_o(db: Session = Depends(get_db)):
 
 
 #post
-@router.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published)
     #                 VALUES (%s, %s, %s) RETURNING *""",
@@ -33,8 +36,8 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
 
 
 #getone
-@router.get("/posts/{id}")
-def get_posts(id: int, db: Session = Depends(get_db)):
+@router.get("/{id}")
+def get_post(id: int, db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id)))
     # post = cursor.fetchone()
     
@@ -47,7 +50,7 @@ def get_posts(id: int, db: Session = Depends(get_db)):
     
 
 #delete
-@router.delete("/posts/{id}", status_code= status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code= status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db)):
     # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id)))
     # deleted_post = cursor.fetchone()
@@ -67,7 +70,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
  
 
 #updateall
-@router.put("/posts/{id}")
+@router.put("/{id}")
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""",

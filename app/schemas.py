@@ -21,7 +21,6 @@ class Post(PostBase):
         from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
         #used to convert sqlalchemy model to pydantic model
 
-
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -33,3 +32,7 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

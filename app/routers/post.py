@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from typing import List
-from .. import models, schemas
+from .. import models, schemas, oauth2
 from ..database import get_db
 
 router = APIRouter(
@@ -11,7 +11,7 @@ router = APIRouter(
 
 #get
 @router.get("/", response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db)):
+def get_posts(db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     # posts = cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
 
@@ -19,25 +19,10 @@ def get_posts(db: Session = Depends(get_db)):
     return posts
 
 
-#post
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
-    # cursor.execute("""INSERT INTO posts (title, content, published)
-    #                 VALUES (%s, %s, %s) RETURNING *""",
-    #                 (post.title, post.content, post.published))
-    # new_post = cursor.fetchone()
-    # conn.commit()
-    
-    new_post = models.Post(**post.model_dump())
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
-
-
 #getone
 @router.get("/{id}")
-def get_post(id: int, db: Session = Depends(get_db)):
+def get_post(id: int, db: Session = Depends(get_db),
+             user_id: int = Depends(oauth2.get_current_user)):
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id)))
     # post = cursor.fetchone()
     
@@ -47,11 +32,30 @@ def get_post(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"post with id: {id} was not found")    
     return post
-    
+
+
+#post
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
+                  user_id: int = Depends(oauth2.get_current_user)): #added user_id for token
+    # cursor.execute("""INSERT INTO posts (title, content, published)
+    #                 VALUES (%s, %s, %s) RETURNING *""",
+    #                 (post.title, post.content, post.published))
+    # new_post = cursor.fetchone()
+    # conn.commit()
+    print(user_id)
+
+    new_post = models.Post(**post.model_dump())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
+
 
 #delete
 @router.delete("/{id}", status_code= status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session = Depends(get_db)):
+def delete_post(id: int, db: Session = Depends(get_db),
+                user_id: int = Depends(oauth2.get_current_user)):
     # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id)))
     # deleted_post = cursor.fetchone()
     # conn.commit()
@@ -71,22 +75,23 @@ def delete_post(id: int, db: Session = Depends(get_db)):
 
 #updateall
 @router.put("/{id}")
-def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db),
+                user_id: int = Depends(oauth2.get_current_user)):
     
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""",
     #                (post.title, post.content, post.published, str(id)))
     # updated_post = cursor.fetchone()
     # conn.commit()
 
-    post_query = db.query(models.Post).filter(models.Post.id == id)  
+    post_query = db.query(models.Post).filter(models.Post.id == id) #sql level  query object
     
-    post = post_query.first()
+    post = post_query.first() #python orm object
 
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} does not exist")
     
-    post.update(updated_post.model_dump(), synchronize_session=False) 
+    post_query.update(updated_post.model_dump(), synchronize_session=False)  # type: ignore
 
     db.commit()
     return post_query.first()

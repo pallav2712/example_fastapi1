@@ -11,18 +11,19 @@ router = APIRouter(
 
 #get
 @router.get("/", response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user = Depends(oauth2.get_current_user)):
     # posts = cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
 
     posts = db.query(models.Post).all()
+    
     return posts
 
 
 #getone
-@router.get("/{id}")
+@router.get("/{id}", response_model=schemas.Post)    #decorator
 def get_post(id: int, db: Session = Depends(get_db),
-             user_id: int = Depends(oauth2.get_current_user)):
+             current_user = Depends(oauth2.get_current_user)):   #whole function is handler
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id)))
     # post = cursor.fetchone()
     
@@ -30,22 +31,23 @@ def get_post(id: int, db: Session = Depends(get_db),
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail=f"post with id: {id} was not found")    
+                            detail=f"post with id: {id} was not found")
+
+            
     return post
 
 
 #post
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)): #added user_id for token
+                  current_user = Depends(oauth2.get_current_user)): #added user_id for token
     # cursor.execute("""INSERT INTO posts (title, content, published)
     #                 VALUES (%s, %s, %s) RETURNING *""",
     #                 (post.title, post.content, post.published))
     # new_post = cursor.fetchone()
     # conn.commit()
-    print(user_id)
-
-    new_post = models.Post(**post.model_dump())
+    
+    new_post = models.Post(owner_id = current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -55,28 +57,33 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db),
 #delete
 @router.delete("/{id}", status_code= status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user = Depends(oauth2.get_current_user)): #returns object
     # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id)))
     # deleted_post = cursor.fetchone()
     # conn.commit()
 
     post_query = db.query(models.Post).filter(models.Post.id == id)
-    post = post_query.first()
 
+    post = post_query.first()
+    
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} does not exist")
     
-    post_query.delete(synchronize_session=False)
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail= "Not authorized to perform request action")
     
+    post_query.delete(synchronize_session=False)
     db.commit()
+    
     return Response(status_code=status.HTTP_204_NO_CONTENT)
  
 
 #updateall
-@router.put("/{id}")
+@router.put("/{id}", response_model=schemas.Post)
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user = Depends(oauth2.get_current_user)):
     
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""",
     #                (post.title, post.content, post.published, str(id)))
@@ -90,6 +97,10 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} does not exist")
+    
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail= "Not authorized to perform request action")
     
     post_query.update(updated_post.model_dump(), synchronize_session=False)  # type: ignore
 

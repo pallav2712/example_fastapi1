@@ -3,25 +3,6 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
-class PostBase(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
-
-class PostCreate(PostBase):
-    pass
-
-
-
-class Post(PostBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
-        #used to convert sqlalchemy model to pydantic model
-
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -37,6 +18,29 @@ class UserOut(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+
+class PostBase(BaseModel):
+    title: str
+    content: str
+    published: bool = True
+
+class PostCreate(PostBase):
+    pass
+
+class Post(PostBase):
+    id: int
+    created_at: datetime
+    owner_id: int
+    owner: UserOut
+
+    class Config:
+        from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
+        #used to convert sqlalchemy model to pydantic model
+
+
+
 
 class Token(BaseModel):
     access_token: str

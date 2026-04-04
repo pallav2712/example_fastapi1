@@ -1,3 +1,5 @@
+from ast import For
+
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
@@ -26,4 +28,10 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
     # def __str__(self):
-    #     return "apple" + str(self.id) # added zuk  # declares type 
+    #     return "apple" + str(self.id) # added zuk  # declares type
+
+
+class Vote(Base):
+    __tablename__ = "votes" 
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True)

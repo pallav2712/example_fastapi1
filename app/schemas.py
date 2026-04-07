@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 
 
@@ -39,6 +39,13 @@ class Post(PostBase):
         from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
         #used to convert sqlalchemy model to pydantic model
 
+class PostOut(BaseModel):
+    Post: Post
+    votes: int
+
+    class Config:
+        from_attributes = True
+
 
 
 
@@ -46,5 +53,11 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     id: Optional[int] = None    #changed str --> int gpt
+
+
+class Vote(BaseModel):
+    post_id: int
+    dir: int = Field(ge=0,le=1) 

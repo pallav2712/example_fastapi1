@@ -32,4 +32,4 @@ app.include_router(vote.router)
 
 @app.get("/")
 def root():
-    return {"message": "I have done this bro deployed through render my app is live now!"}
+    return {"message": "Hello World!"}

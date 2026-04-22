@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 
 
@@ -11,9 +11,8 @@ class UserOut(BaseModel):
     id: int
     email : EmailStr
     created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -34,17 +33,15 @@ class Post(PostBase):
     created_at: datetime
     owner_id: int
     owner: UserOut
-
-    class Config:
-        from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
+    model_config = ConfigDict(from_attributes=True)
+    # class Config:
+    #     from_attributes = True  # used from_attributes instead of orm mode as per new pydantic version
         #used to convert sqlalchemy model to pydantic model
 
 class PostOut(BaseModel):
     Post: Post
     votes: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 

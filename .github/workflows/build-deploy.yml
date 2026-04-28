@@ -11,7 +11,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: 051727
-          POSTGRES_DB: fastapi
+          POSTGRES_DB: fastapi_test
         ports:
           - 5432:5432
         options: >-
@@ -24,7 +24,7 @@ jobs:
       DATABASE_HOSTNAME: postgres
       DATABASE_PORT: 5432
       DATABASE_PASSWORD: 051727
-      DATABASE_NAME: fastapi_test
+      DATABASE_NAME: fastapi
       DATABASE_USERNAME: postgres
       SECRET_KEY: 09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
       ALGORITHM: HS256

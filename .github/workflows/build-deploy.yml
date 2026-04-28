@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   job1:
     runs-on: ubuntu-latest
+    container: 
+      python: 3.14
     services:
       postgres:
         image: postgres:15

@@ -6,9 +6,10 @@ jobs:
   job1:
     runs-on: ubuntu-latest
     container: python:3.14
+    
     services:
       postgres:
-        image: postgres:15
+        image: postgres
         env:
           POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           POSTGRES_DB: ${{ secrets.DATABASE_NAME }}_test
